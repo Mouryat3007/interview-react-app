@@ -25,12 +25,13 @@ jobs:
       - name: Set environment
         id: env
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${GITHUB_REF}" = "refs/heads/main" ]; then
             echo "environment=prd" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
+        shell: bash
 
   # Deploy infrastructure with Terraform
   deploy-infrastructure:
