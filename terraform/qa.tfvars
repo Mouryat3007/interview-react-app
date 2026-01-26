@@ -1,3 +1,3 @@
 environment = "qa"
-location    = "eastus"
+location    = "eastus2"
 sku_tier    = "Free"
