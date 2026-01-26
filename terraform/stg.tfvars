@@ -1,3 +1,3 @@
 environment = "stg"
-location    = "eastus"
+location    = "eastus2"
 sku_tier    = "Standard"
