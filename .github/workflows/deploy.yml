@@ -24,7 +24,6 @@ jobs:
     steps:
       - name: Set environment
         id: env
-        shell: bash
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
@@ -33,21 +32,22 @@ jobs:
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
+
   # Deploy infrastructure with Terraform
   deploy-infrastructure:
     needs: setup
     runs-on: ubuntu-latest
-    environment: ${{ needs.setup.outputs.environment }}
+    environment: 
+      name: ${{ needs.setup.outputs.environment }}
     outputs:
       deployment_token: ${{ steps.tf-output.outputs.token }}
     steps:
       - uses: actions/checkout@v4
       
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v1
         with:
-          auth-type: SERVICE_PRINCIPAL
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -89,7 +89,8 @@ jobs:
   deploy-app:
     needs: [setup, deploy-infrastructure]
     runs-on: ubuntu-latest
-    environment: ${{ needs.setup.outputs.environment }}
+    environment:
+      name: ${{ needs.setup.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
       
