@@ -1,0 +1,55 @@
+name: React CI Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-scan:
+    name: Build & Scan React App
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      # Install dependencies
+      - name: Install dependencies
+        working-directory: my-app
+        run: npm ci
+
+      # Security scan
+      - name: NPM Audit (Security Scan)
+        working-directory: my-app
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      # Linting
+      - name: Lint React App
+        working-directory: my-app
+        run: npm run lint || echo "Lint warnings found"
+
+      # Build with metadata
+      - name: Build React App
+        working-directory: my-app
+        run: |
+          export REACT_APP_ENV=dev
+          export REACT_APP_BUILD_TIME=$(date -u)
+          npm run build
+
+      # Upload build artifact
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-build
+          path: my-app/build
