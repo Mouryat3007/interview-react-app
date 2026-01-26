@@ -16,6 +16,7 @@ permissions:
   id-token: write
 
 jobs:
+  # Determine which environment to deploy
   setup:
     runs-on: ubuntu-latest
     outputs:
@@ -23,7 +24,6 @@ jobs:
     steps:
       - name: Set environment
         id: env
-        shell: bash
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
@@ -32,7 +32,8 @@ jobs:
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
-# Deploy Infra
+
+  # Deploy infrastructure with Terraform
   deploy-infrastructure:
     needs: setup
     runs-on: ubuntu-latest
@@ -62,7 +63,23 @@ jobs:
         working-directory: terraform
         run: |
           terraform init \
-            -backend-config="storage_account_name=tfstate123546${{ needs.setup.outputs.environment }}"
+            -backend-config="storage_account_name=tfstate${{ needs.setup.outputs.environment }}"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_CLI: false
+      
+      - name: Import Existing Resources
+        working-directory: terraform
+        continue-on-error: true
+        run: |
+          # Import resource group if it exists
+          terraform import \
+            -var-file="${{ needs.setup.outputs.environment }}.tfvars" \
+            azurerm_resource_group.main \
+            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/ira-${{ needs.setup.outputs.environment }}-rg
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -86,7 +103,17 @@ jobs:
         id: tf-output
         working-directory: terraform
         run: |
-          TOKEN=$(terraform output -raw static_web_app_token)
+          # Refresh outputs
+          terraform refresh -var-file="${{ needs.setup.outputs.environment }}.tfvars"
+          
+          # Get the token
+          TOKEN=$(terraform output -raw static_web_app_token 2>/dev/null || echo "")
+          
+          if [ -z "$TOKEN" ]; then
+            echo "Error: Could not retrieve deployment token"
+            exit 1
+          fi
+          
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
         env:
@@ -94,8 +121,9 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_USE_CLI: false  
-# Build and Deploy React app
+          ARM_USE_CLI: false
+
+  # Build and deploy the React app
   deploy-app:
     needs: [setup, deploy-infrastructure]
     runs-on: ubuntu-latest
