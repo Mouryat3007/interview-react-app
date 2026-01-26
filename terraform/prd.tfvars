@@ -1,3 +1,3 @@
 environment = "prd"
-location    = "eastus"
+location    = "eastus2"
 sku_tier    = "Standard"
