@@ -27,11 +27,23 @@ resource "azurerm_static_web_app" "main" {
   tags = local.common_tags
 }
 
+# Log Analytics Workspace for Application Insights
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "${local.resource_prefix}-law"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = var.location
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  
+  tags = local.common_tags
+}
+
 # Application Insights for monitoring
 resource "azurerm_application_insights" "main" {
   name                = "${local.resource_prefix}-ai"
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
+  workspace_id        = azurerm_log_analytics_workspace.main.id
   application_type    = "web"
   
   tags = local.common_tags
