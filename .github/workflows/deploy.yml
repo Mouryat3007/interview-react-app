@@ -89,7 +89,13 @@ jobs:
           TOKEN=$(terraform output -raw static_web_app_token)
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
-
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_CLI: false  
+# Build and Deploy React app
   deploy-app:
     needs: [setup, deploy-infrastructure]
     runs-on: ubuntu-latest
