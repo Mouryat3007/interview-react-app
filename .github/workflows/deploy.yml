@@ -16,7 +16,6 @@ permissions:
   id-token: write
 
 jobs:
-  # Determine which environment to deploy
   setup:
     runs-on: ubuntu-latest
     outputs:
@@ -24,6 +23,7 @@ jobs:
     steps:
       - name: Set environment
         id: env
+        shell: bash
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
@@ -33,14 +33,11 @@ jobs:
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
 
-  # Deploy infrastructure with Terraform
   deploy-infrastructure:
     needs: setup
     runs-on: ubuntu-latest
     environment: 
       name: ${{ needs.setup.outputs.environment }}
-    outputs:
-      deployment_token: ${{ steps.tf-output.outputs.token }}
     steps:
       - uses: actions/checkout@v4
       
@@ -71,22 +68,6 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_CLI: false
       
-      - name: Import Existing Resources
-        working-directory: terraform
-        continue-on-error: true
-        run: |
-          # Import resource group if it exists
-          terraform import \
-            -var-file="${{ needs.setup.outputs.environment }}.tfvars" \
-            azurerm_resource_group.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/ira-${{ needs.setup.outputs.environment }}-rg
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_USE_CLI: false
-      
       - name: Terraform Apply
         working-directory: terraform
         run: |
@@ -103,27 +84,33 @@ jobs:
         id: tf-output
         working-directory: terraform
         run: |
-          # Refresh outputs
-          terraform refresh -var-file="${{ needs.setup.outputs.environment }}.tfvars"
-          
           # Get the token
-          TOKEN=$(terraform output -raw static_web_app_token 2>/dev/null || echo "")
+          TOKEN=$(terraform output -raw static_web_app_token)
           
-          if [ -z "$TOKEN" ]; then
+          if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
             echo "Error: Could not retrieve deployment token"
             exit 1
           fi
           
+          echo "Token retrieved successfully (length: ${#TOKEN})"
           echo "::add-mask::$TOKEN"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          
+          # Save to file for artifact
+          echo "$TOKEN" > /tmp/deployment_token.txt
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_CLI: false
+      
+      - name: Upload Token as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-token
+          path: /tmp/deployment_token.txt
+          retention-days: 1
 
-  # Build and deploy the React app
   deploy-app:
     needs: [setup, deploy-infrastructure]
     runs-on: ubuntu-latest
@@ -132,14 +119,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Debug - Check Token
+      - name: Download Token Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-token
+          path: /tmp
+      
+      - name: Read Token from Artifact
+        id: read-token
         run: |
-          if [ -z "${{ needs.deploy-infrastructure.outputs.deployment_token }}" ]; then
-            echo "ERROR: Deployment token is empty!"
-            exit 1
-          else
-            echo "Token received successfully (masked)"
-          fi
+          TOKEN=$(cat /tmp/deployment_token.txt)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "Token loaded from artifact (length: ${#TOKEN})"
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -157,7 +149,7 @@ jobs:
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ needs.deploy-infrastructure.outputs.deployment_token }}
+          azure_static_web_apps_api_token: ${{ steps.read-token.outputs.token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "/my-app"
