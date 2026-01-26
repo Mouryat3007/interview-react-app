@@ -1,4 +1,4 @@
- InvestorFlow – DevOps Platform Engineering Assignment
+ InvestorFlow – DevOps Platform Engineering Assignment..
 
 This repository demonstrates a production-oriented DevOps and Platform Engineering approach for deploying a React application using **GitHub Actions**, **Terraform**, and **Azure**.  
 The focus of this exercise is on **CI/CD design, Infrastructure as Code (IaC), multi-environment strategy, security, and developer experience**, rather than on frontend complexity.
