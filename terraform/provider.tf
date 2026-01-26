@@ -1,15 +1,27 @@
-terraform {
-  required_version = "~> 1.7"
+# provider.tf - Provider and backend configuration
 
+terraform {
+  required_version = ">= 1.5.0"
+  
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 4.0.0"
+      version = "~> 3.80"
     }
+  }
+  
+  backend "azurerm" {
+    resource_group_name  = "tfstate-rg"
+    storage_account_name = "tfstateapp"  # Will be overridden per env
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
   }
 }
 
 provider "azurerm" {
-  features {}
-  subscription_id = var.subscription_id
+  features {
+    key_vault {
+      purge_soft_delete_on_destroy = true
+    }
+  }
 }
