@@ -132,6 +132,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Debug - Check Token
+        run: |
+          if [ -z "${{ needs.deploy-infrastructure.outputs.deployment_token }}" ]; then
+            echo "ERROR: Deployment token is empty!"
+            exit 1
+          else
+            echo "Token received successfully (masked)"
+          fi
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
