@@ -147,11 +147,20 @@ jobs:
           npm run build
       
       - name: Deploy to Azure Static Web Apps
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ steps.read-token.outputs.token }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: "upload"
-          app_location: "/my-app"
-          output_location: "build"
-          skip_app_build: true
+        working-directory: my-app/build
+        run: |
+          # Install Static Web Apps CLI
+          npm install -g @azure/static-web-apps-cli
+          
+          # Deploy using the token
+          TOKEN="${{ steps.read-token.outputs.token }}"
+          
+          if [ -z "$TOKEN" ]; then
+            echo "ERROR: Token is empty!"
+            exit 1
+          fi
+          
+          echo "Deploying to Azure Static Web Apps..."
+          swa deploy . \
+            --deployment-token "$TOKEN" \
+            --env production
