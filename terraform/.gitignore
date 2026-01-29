@@ -1,0 +1,423 @@
+# ============================================
+# .gitignore for Interview React App
+# DevOps CI/CD Implementation
+# ============================================
+# Stack: React, Terraform, Node.js, Azure
+# Last Updated: January 2026
+# ============================================
+
+# ============================================
+# SECRETS & CREDENTIALS - NEVER COMMIT!
+# ============================================
+
+# Environment files with secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Azure credentials
+azure-credentials.json
+azureauth.json
+.azure/
+az-credentials.json
+
+# Service Principal files
+service-principal.json
+sp-credentials.json
+
+# SSH keys
+*.pem
+*.key
+*.ppk
+id_rsa
+id_rsa.pub
+*.pub
+
+# GPG keys
+*.gpg
+*.asc
+
+# Certificate files
+*.pfx
+*.p12
+*.cer
+*.crt
+
+# API keys and tokens
+*.token
+api-keys.json
+secrets.json
+credentials.json
+
+# Password files
+passwords.txt
+*.password
+
+
+# ============================================
+# TERRAFORM
+# ============================================
+
+# Terraform state files - should be in remote backend
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform variable files with sensitive data
+*.tfvars.json
+secrets.tfvars
+*.secret.tfvars
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Terraform directory
+.terraform/
+.terraform.lock.hcl
+
+# Terraform plan output
+*.tfplan
+tfplan
+plan.out
+
+# Terraform override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform CLI configuration
+.terraformrc
+terraform.rc
+
+# Terraform logs
+terraform.log
+*.terraform.log
+
+
+# ============================================
+# NODE.JS & NPM
+# ============================================
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Caches
+.npm/
+.eslintcache
+.node_repl_history
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.cache/
+
+
+# ============================================
+# REACT & FRONTEND
+# ============================================
+
+# Production build
+/build
+/dist
+
+# Testing
+/coverage
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# React specific
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Create React App
+.eslintcache
+
+
+# ============================================
+# AZURE SPECIFIC
+# ============================================
+
+# Azure Functions
+local.settings.json
+__blobstorage__/
+__queuestorage__/
+__azurite_db*__.json
+.python_packages/
+
+# Azure CLI
+.azure/
+.azureauth
+
+# Azure DevOps
+.vscode/
+.vs/
+
+# Azure Static Web Apps
+.staticwebapp.config.json.backup
+
+
+# ============================================
+# CI/CD & GITHUB ACTIONS
+# ============================================
+
+# GitHub Actions artifacts (if downloaded locally)
+artifacts/
+.github/artifacts/
+
+# Test reports
+test-results/
+junit.xml
+test-report.xml
+
+
+# ============================================
+# DOCKER
+# ============================================
+
+# Docker files (if you add Docker later)
+*.dockerignore.swp
+docker-compose.override.yml
+
+
+# ============================================
+# IDE & EDITOR FILES
+# ============================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+.history/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.*.sw[a-z]
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+
+# ============================================
+# OPERATING SYSTEM FILES
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+
+# ============================================
+# BACKUP & TEMPORARY FILES
+# ============================================
+
+# Backups
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+
+# Temporary files
+tmp/
+temp/
+*.temp
+*.swp
+*.swo
+
+
+# ============================================
+# DOCUMENTATION BUILD FILES
+# ============================================
+
+# Documentation sites
+docs/_build/
+site/
+_site/
+
+
+# ============================================
+# PYTHON (if you use Python scripts)
+# ============================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+
+
+# ============================================
+# SECURITY SCANNING RESULTS
+# ============================================
+
+# Trivy results (if saved locally)
+trivy-results.json
+vulnerability-report.json
+
+# Checkov results
+checkov-results.json
+checkov-report.json
+
+# SAST/DAST results
+security-scan-results/
+*.sarif
+
+
+# ============================================
+# LOCAL CONFIGURATION
+# ============================================
+
+# Local configuration
+local.config.js
+local.config.json
+.local/
+
+# User-specific files
+*.user
+*.suo
+
+
+# ============================================
+# CUSTOM PROJECT-SPECIFIC
+# ============================================
+
+# Add your project-specific ignores below:
+
+# Terraform outputs (if you save them locally)
+terraform-outputs.json
+tf-outputs.json
+
+# Azure resource outputs
+azure-resources.json
+
+# Deployment artifacts
+deployment-package.zip
+release.zip
+
+# Cost reports
+cost-analysis.csv
+billing-report.xlsx
+
+
+# ============================================
+# EXCLUDE PATTERNS (what TO include)
+# ============================================
+
+# Ensure these important files are NOT ignored:
+!.gitignore
+!.github/workflows/*.yml
+!terraform/**/*.tf
+!terraform/**/*.tfvars.example
+!src/**/*
+!public/**/*
+!package.json
+!README.md
+!LICENSE
+
+
+# ============================================
+# END OF .gitignore
+# ============================================
+
+# Notes:
+# - Never commit secrets or credentials
+# - Use .tfvars.example for variable examples
+# - Store secrets in GitHub Secrets
+# - Use Azure Key Vault for application secrets
+# - Keep this file updated as project evolves
